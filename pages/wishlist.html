@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - HomeHub</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Supabase Config -->
+    <script src="../js/config/supabase.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF3E6C',
+                        secondary: '#282C3F',
+                        accent: '#FB641B'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+
+    <!-- Top Banner -->
+    <div class="bg-gradient-to-r from-primary to-pink-500 text-white text-center py-2 text-sm">
+        <p>💝 Save your favorites! Add items to wishlist for easy shopping later</p>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between py-4">
+                <div class="flex items-center space-x-8">
+                    <a href="../index.html" class="text-2xl font-bold text-secondary">
+                        <i class="fas fa-home text-primary"></i> HomeHub
+                    </a>
+                    
+                    <div class="hidden md:flex space-x-6">
+                        <a href="../index.html" class="text-secondary hover:text-primary font-medium transition">Home</a>
+                        <a href="products.html" class="text-secondary hover:text-primary font-medium transition">Shop</a>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-6">
+                    <a href="wishlist.html" class="relative hidden md:block">
+                        <i class="fas fa-heart text-xl text-primary"></i>
+                        <span class="wishlist-count absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </a>
+
+                    <a href="cart.html" class="relative">
+                        <i class="fas fa-shopping-bag text-xl text-secondary hover:text-primary transition"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center text-sm text-gray-600">
+                <a href="../index.html" class="hover:text-primary">Home</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-secondary font-medium">My Wishlist</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-secondary mb-2">My Wishlist</h1>
+                <p class="text-gray-600"><span id="wishlist-count-text">0</span> items saved</p>
+            </div>
+            <button onclick="moveAllToCart()" id="move-all-btn" class="hidden bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-600 transition">
+                <i class="fas fa-shopping-cart mr-2"></i>Add All to Cart
+            </button>
+        </div>
+
+        <!-- Wishlist Items -->
+        <div id="wishlist-items-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Wishlist items will be loaded here -->
+        </div>
+
+        <!-- Empty Wishlist State -->
+        <div id="empty-wishlist" class="hidden bg-white rounded-xl shadow-md p-12 text-center">
+            <i class="far fa-heart text-6xl text-gray-300 mb-4"></i>
+            <h2 class="text-2xl font-bold text-secondary mb-2">Your Wishlist is Empty</h2>
+            <p class="text-gray-600 mb-6">Save your favorite items here for easy access later!</p>
+            <a href="products.html" class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-600 transition">
+                <i class="fas fa-arrow-left mr-2"></i>Start Shopping
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-secondary text-white py-12 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="text-center">
+                <p>&copy; 2024 HomeHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let allProducts = [];
+
+        // Load products from database
+        async function initWishlist() {
+            try {
+                allProducts = await getAllProducts();
+                loadWishlist();
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        // Get product by ID
+        function getProduct(id) {
+            return allProducts.find(p => p.id === id);
+        }
+
+        // Generate stars
+        function generateStars(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.floor(rating)) stars += '<i class="fas fa-star"></i>';
+                else if (i === Math.ceil(rating) && rating % 1 !== 0) stars += '<i class="fas fa-star-half-alt"></i>';
+                else stars += '<i class="far fa-star"></i>';
+            }
+            return stars;
+        }
+
+        // Load wishlist
+        function loadWishlist() {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            const container = document.getElementById('wishlist-items-container');
+            const emptyWishlist = document.getElementById('empty-wishlist');
+            const moveAllBtn = document.getElementById('move-all-btn');
+            
+            document.getElementById('wishlist-count-text').textContent = wishlist.length;
+
+            if (wishlist.length === 0) {
+                container.innerHTML = '';
+                emptyWishlist.classList.remove('hidden');
+                moveAllBtn.classList.add('hidden');
+                return;
+            }
+
+            emptyWishlist.classList.add('hidden');
+            moveAllBtn.classList.remove('hidden');
+
+            container.innerHTML = wishlist.map(productId => {
+                const product = getProduct(productId);
+                if (!product) return '';
+
+                const discountBadge = product.discount > 0 
+                    ? `<div class="absolute top-2 left-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">-${product.discount}%</div>`
+                    : '';
+
+                const originalPrice = product.original_price 
+                    ? `<span class="text-sm text-gray-400 line-through ml-2">${formatPrice(product.original_price)}</span>`
+                    : '';
+
+                return `
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300">
+                        <div class="relative overflow-hidden">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer" onclick="viewProduct(${product.id})">
+                            ${discountBadge}
+                            <button onclick="removeFromWishlist(${product.id})" class="absolute top-2 right-2 bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-red-50 transition">
+                                <i class="fas fa-heart text-red-500"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <div class="text-xs text-gray-500 mb-1">${product.brand}</div>
+                            <h3 class="font-semibold text-secondary mb-2 line-clamp-2 hover:text-primary cursor-pointer" onclick="viewProduct(${product.id})">
+                                ${product.name}
+                            </h3>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400 text-sm">
+                                    ${generateStars(product.rating)}
+                                </div>
+                                <span class="text-xs text-gray-500 ml-2">(${product.reviews})</span>
+                            </div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <span class="text-xl font-bold text-secondary">${formatPrice(product.price)}</span>
+                                    ${originalPrice}
+                                </div>
+                            </div>
+                            <button onclick="addToCartFromWishlist(${product.id})" class="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-pink-600 transition">
+                                <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Remove from wishlist
+        function removeFromWishlist(productId) {
+            let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            wishlist = wishlist.filter(id => id !== productId);
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+            loadWishlist();
+            updateWishlistCount();
+            showToast('Removed from wishlist', 'info');
+        }
+
+        // Add to cart from wishlist
+        function addToCartFromWishlist(productId) {
+            const product = getProduct(productId);
+            if (!product) return;
+
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const existing = cart.find(item => item.id === productId);
+            
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    brand: product.brand,
+                    quantity: 1
+                });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            showToast('Added to cart!', 'success');
+        }
+
+        // Move all to cart
+        function moveAllToCart() {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            wishlist.forEach(productId => {
+                const product = getProduct(productId);
+                if (product) {
+                    const existing = cart.find(item => item.id === productId);
+                    if (existing) {
+                        existing.quantity += 1;
+                    } else {
+                        cart.push({
+                            id: product.id,
+                            name: product.name,
+                            price: product.price,
+                            image: product.image,
+                            brand: product.brand,
+                            quantity: 1
+                        });
+                    }
+                }
+            });
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            localStorage.setItem('wishlist', JSON.stringify([]));
+            updateCartCount();
+            loadWishlist();
+            showToast('All items moved to cart!', 'success');
+        }
+
+        // View product
+        function viewProduct(productId) {
+            window.location.href = `product-detail.html?id=${productId}`;
+        }
+
+        // Update cart count
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count').textContent = count;
+        }
+
+        // Update wishlist count
+        function updateWishlistCount() {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            document.querySelectorAll('.wishlist-count').forEach(el => {
+                el.textContent = wishlist.length;
+            });
+        }
+
+        // Show toast
+        function showToast(message, type = 'success') {
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'info' ? 'bg-blue-500' : 'bg-red-500';
+            const icon = type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-circle';
+            
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 ${bgColor} flex items-center space-x-2`;
+            toast.innerHTML = `<i class="fas fa-${icon}"></i><span>${message}</span>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCartCount();
+            updateWishlistCount();
+            initWishlist();
+        });
+    </script>
+</body>
+</html>

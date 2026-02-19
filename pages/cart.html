@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - HomeHub</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Supabase Config -->
+    <script src="../js/config/supabase.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF3E6C',
+                        secondary: '#282C3F',
+                        accent: '#FB641B'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+
+    <!-- Top Banner -->
+    <div class="bg-gradient-to-r from-primary to-pink-500 text-white text-center py-2 text-sm">
+        <p>🎉 MEGA SALE! Get up to 70% OFF on Home Appliances | Free Shipping on Orders Above ₹3,000</p>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between py-4">
+                <div class="flex items-center space-x-8">
+                    <a href="../index.html" class="text-2xl font-bold text-secondary">
+                        <i class="fas fa-home text-primary"></i> HomeHub
+                    </a>
+                    
+                    <div class="hidden md:flex space-x-6">
+                        <a href="../index.html" class="text-secondary hover:text-primary font-medium transition">Home</a>
+                        <a href="products.html" class="text-secondary hover:text-primary font-medium transition">Shop</a>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-6">
+                    <a href="wishlist.html" class="relative hidden md:block">
+                        <i class="far fa-heart text-xl text-secondary hover:text-primary transition"></i>
+                        <span class="wishlist-count absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </a>
+
+                    <a href="cart.html" class="relative">
+                        <i class="fas fa-shopping-bag text-xl text-primary"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center text-sm text-gray-600">
+                <a href="../index.html" class="hover:text-primary">Home</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-secondary font-medium">Shopping Cart</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-secondary mb-8">Shopping Cart</h1>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Cart Items -->
+            <div class="lg:col-span-2">
+                <div id="cart-items-container">
+                    <!-- Cart items will be loaded here -->
+                </div>
+
+                <!-- Empty Cart State -->
+                <div id="empty-cart" class="hidden bg-white rounded-xl shadow-md p-12 text-center">
+                    <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+                    <h2 class="text-2xl font-bold text-secondary mb-2">Your Cart is Empty</h2>
+                    <p class="text-gray-600 mb-6">Looks like you haven't added anything to your cart yet.</p>
+                    <a href="products.html" class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-600 transition">
+                        <i class="fas fa-arrow-left mr-2"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div id="order-summary" class="bg-white rounded-xl shadow-md p-6 sticky top-24">
+                    <h2 class="text-xl font-bold text-secondary mb-6">Order Summary</h2>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Subtotal (<span id="total-items">0</span> items)</span>
+                            <span id="subtotal">₹0</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Shipping</span>
+                            <span id="shipping" class="text-green-600">FREE</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Tax (10%)</span>
+                            <span id="tax">₹0</span>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-4 mb-6">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold text-secondary">Total</span>
+                            <span id="total" class="text-2xl font-bold text-primary">₹0</span>
+                        </div>
+                    </div>
+
+                    <!-- Promo Code -->
+                    <div class="mb-4">
+                        <div class="flex space-x-2">
+                            <input type="text" id="promo-code" placeholder="Promo Code" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            <button onclick="applyPromo()" class="bg-gray-200 text-secondary px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">
+                                Apply
+                            </button>
+                        </div>
+                    </div>
+
+                    <button onclick="proceedToCheckout()" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-pink-600 transition mb-3">
+                        <i class="fas fa-lock mr-2"></i>Proceed to Checkout
+                    </button>
+
+                    <a href="products.html" class="block w-full text-center text-primary font-semibold hover:underline">
+                        <i class="fas fa-arrow-left mr-2"></i>Continue Shopping
+                    </a>
+
+                    <!-- Trust Badges -->
+                    <div class="mt-6 pt-6 border-t">
+                        <div class="flex items-center justify-center space-x-4 text-gray-500 text-xs">
+                            <div class="flex items-center">
+                                <i class="fas fa-shield-alt mr-1"></i>
+                                <span>Secure</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-lock mr-1"></i>
+                                <span>Encrypted</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-truck mr-1"></i>
+                                <span>Free Shipping</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-secondary text-white py-12 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="text-center">
+                <p>&copy; 2024 HomeHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let allProducts = [];
+
+        // Load products from database
+        async function initCart() {
+            try {
+                allProducts = await getAllProducts();
+                loadCart();
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        // Get product by ID
+        function getProduct(id) {
+            return allProducts.find(p => p.id === id);
+        }
+
+        // Load cart items
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const container = document.getElementById('cart-items-container');
+            const emptyCart = document.getElementById('empty-cart');
+            const orderSummary = document.getElementById('order-summary');
+
+            if (cart.length === 0) {
+                container.innerHTML = '';
+                emptyCart.classList.remove('hidden');
+                orderSummary.classList.add('hidden');
+                return;
+            }
+
+            emptyCart.classList.add('hidden');
+            orderSummary.classList.remove('hidden');
+
+            container.innerHTML = cart.map(item => {
+                const product = getProduct(item.id);
+                if (!product) return '';
+
+                return `
+                    <div class="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-col md:flex-row items-center gap-4">
+                        <img src="${product.image}" alt="${product.name}" class="w-24 h-24 object-cover rounded-lg">
+                        
+                        <div class="flex-1 text-center md:text-left">
+                            <h3 class="font-semibold text-secondary text-lg mb-1">${product.name}</h3>
+                            <p class="text-sm text-gray-500 mb-2">${product.brand}</p>
+                            <p class="text-xl font-bold text-primary">${formatPrice(product.price)}</p>
+                        </div>
+
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center border border-gray-300 rounded-lg">
+                                <button onclick="updateQuantity(${item.id}, -1)" class="px-3 py-1 hover:bg-gray-100 transition">
+                                    <i class="fas fa-minus text-sm"></i>
+                                </button>
+                                <span class="px-4 py-1 border-x border-gray-300 font-semibold">${item.quantity}</span>
+                                <button onclick="updateQuantity(${item.id}, 1)" class="px-3 py-1 hover:bg-gray-100 transition">
+                                    <i class="fas fa-plus text-sm"></i>
+                                </button>
+                            </div>
+
+                            <div class="text-right">
+                                <p class="text-lg font-bold text-secondary">${formatPrice(product.price * item.quantity)}</p>
+                            </div>
+
+                            <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 transition">
+                                <i class="fas fa-trash text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateSummary();
+        }
+
+        // Update quantity
+        function updateQuantity(productId, change) {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const item = cart.find(i => i.id === productId);
+            
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== productId);
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                loadCart();
+                updateCartCount();
+            }
+        }
+
+        // Remove from cart
+        function removeFromCart(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            cart = cart.filter(i => i.id !== productId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            loadCart();
+            updateCartCount();
+            showToast('Item removed from cart', 'info');
+        }
+
+        // Update summary
+        function updateSummary() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            let subtotal = 0;
+            let totalItems = 0;
+
+            cart.forEach(item => {
+                const product = getProduct(item.id);
+                if (product) {
+                    subtotal += product.price * item.quantity;
+                    totalItems += item.quantity;
+                }
+            });
+
+            const shipping = subtotal >= 3000 ? 0 : 150;
+            const tax = subtotal * 0.10;
+            const total = subtotal + shipping + tax;
+
+            document.getElementById('total-items').textContent = totalItems;
+            document.getElementById('subtotal').textContent = formatPrice(subtotal);
+            document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : formatPrice(shipping);
+            document.getElementById('shipping').className = shipping === 0 ? 'text-green-600' : 'text-gray-600';
+            document.getElementById('tax').textContent = formatPrice(tax);
+            document.getElementById('total').textContent = formatPrice(total);
+        }
+
+        // Update cart count
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count').textContent = count;
+        }
+
+        // Update wishlist count
+        function updateWishlistCount() {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            document.querySelectorAll('.wishlist-count').forEach(el => {
+                el.textContent = wishlist.length;
+            });
+        }
+
+        // Apply promo code
+        function applyPromo() {
+            const code = document.getElementById('promo-code').value.trim().toUpperCase();
+            if (code === 'SAVE10') {
+                showToast('Promo code applied! 10% discount', 'success');
+            } else if (code === 'FREESHIP') {
+                showToast('Free shipping applied!', 'success');
+            } else if (code) {
+                showToast('Invalid promo code', 'error');
+            }
+        }
+
+        // Proceed to checkout
+        function proceedToCheckout() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            if (cart.length === 0) {
+                showToast('Your cart is empty!', 'error');
+                return;
+            }
+            window.location.href = 'checkout.html';
+        }
+
+        // Show toast
+        function showToast(message, type = 'success') {
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'info' ? 'bg-blue-500' : 'bg-red-500';
+            const icon = type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-circle';
+            
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 ${bgColor} flex items-center space-x-2`;
+            toast.innerHTML = `<i class="fas fa-${icon}"></i><span>${message}</span>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCartCount();
+            updateWishlistCount();
+            initCart();
+        });
+    </script>
+</body>
+</html>

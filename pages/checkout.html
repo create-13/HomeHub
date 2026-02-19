@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - HomeHub</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Supabase Config -->
+    <script src="../js/config/supabase.js"></script>
+    
+    <!-- PayPal Config -->
+    <script src="../js/config/paypal.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF3E6C',
+                        secondary: '#282C3F',
+                        accent: '#FB641B'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+
+    <!-- Top Banner -->
+    <div class="bg-gradient-to-r from-primary to-pink-500 text-white text-center py-2 text-sm">
+        <p>🔒 Secure Checkout | 100% Safe & Encrypted</p>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between py-4">
+                <a href="../index.html" class="text-2xl font-bold text-secondary">
+                    <i class="fas fa-home text-primary"></i> HomeHub
+                </a>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 text-sm text-gray-600">
+                        <i class="fas fa-lock text-green-600"></i>
+                        <span>Secure Checkout</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Checkout Steps -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-center space-x-4">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold">1</div>
+                    <span class="ml-2 font-semibold text-primary">Cart</span>
+                </div>
+                <div class="w-16 h-1 bg-primary"></div>
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold">2</div>
+                    <span class="ml-2 font-semibold text-primary">Checkout</span>
+                </div>
+                <div class="w-16 h-1 bg-gray-300"></div>
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold">3</div>
+                    <span class="ml-2 text-gray-600">Complete</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid lg:grid-cols-3 gap-8">
+            
+            <!-- Checkout Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-secondary mb-6">Shipping Information</h2>
+                    
+                    <form id="checkout-form">
+                        <div class="grid md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-secondary mb-2">Full Name *</label>
+                                <input type="text" id="full-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Enter your full name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-secondary mb-2">Email Address *</label>
+                                <input type="email" id="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="your@email.com">
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-secondary mb-2">Phone Number *</label>
+                                <input type="tel" id="phone" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="+91 98765 43210">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-secondary mb-2">PIN Code *</label>
+                                <input type="text" id="pincode" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="400001">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-secondary mb-2">Street Address *</label>
+                            <input type="text" id="address-line1" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mb-2" placeholder="House No., Building Name">
+                            <input type="text" id="address-line2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Road Name, Area, Colony (Optional)">
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-secondary mb-2">City *</label>
+                                <input type="text" id="city" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Mumbai">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-secondary mb-2">State *</label>
+                                <input type="text" id="state" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Maharashtra">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-secondary mb-2">Country *</label>
+                                <input type="text" id="country" value="India" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-secondary mb-2">Order Notes (Optional)</label>
+                            <textarea id="order-notes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Any special instructions for delivery..."></textarea>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-secondary mb-6">Payment Method</h2>
+                    
+                    <div class="space-y-4 mb-6">
+                        <label class="flex items-center p-4 border-2 border-primary bg-primary/5 rounded-lg cursor-pointer">
+                            <input type="radio" name="payment" value="paypal" checked class="mr-3">
+                            <div class="flex-1">
+                                <div class="font-semibold text-secondary">PayPal</div>
+                                <div class="text-sm text-gray-600">Pay securely with PayPal</div>
+                            </div>
+                            <i class="fab fa-paypal text-3xl text-blue-600"></i>
+                        </label>
+
+                        <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-not-allowed opacity-50">
+                            <input type="radio" name="payment" value="cod" disabled class="mr-3">
+                            <div class="flex-1">
+                                <div class="font-semibold text-secondary">Cash on Delivery</div>
+                                <div class="text-sm text-gray-600">Coming Soon</div>
+                            </div>
+                            <i class="fas fa-money-bill-wave text-3xl text-green-600"></i>
+                        </label>
+                    </div>
+
+                    <!-- PayPal Button Container -->
+                    <div id="paypal-button-container" class="mt-6"></div>
+
+                    <!-- Loading State -->
+                    <div id="paypal-loading" class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin text-2xl text-primary mb-2"></i>
+                        <p class="text-sm text-gray-600">Loading payment options...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-md p-6 sticky top-24">
+                    <h2 class="text-xl font-bold text-secondary mb-6">Order Summary</h2>
+                    
+                    <!-- Cart Items -->
+                    <div id="summary-items" class="space-y-4 mb-6 max-h-64 overflow-y-auto">
+                        <!-- Items will be loaded here -->
+                    </div>
+
+                    <div class="border-t pt-4 space-y-3 mb-4">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Subtotal (<span id="summary-total-items">0</span> items)</span>
+                            <span id="summary-subtotal">₹0</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Shipping</span>
+                            <span id="summary-shipping" class="text-green-600">FREE</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Tax (10%)</span>
+                            <span id="summary-tax">₹0</span>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xl font-bold text-secondary">Total</span>
+                            <span id="summary-total" class="text-2xl font-bold text-primary">₹0</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                            <div class="text-sm text-blue-800">
+                                <strong>Test Mode:</strong> Using PayPal Sandbox. Use test credentials to complete payment.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-secondary text-white py-8 mt-16">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2024 HomeHub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AZidt6ZkI2iPW81EEFxFidsQcIlNSSh0Xbt6iyJcuaonmEDDbKnfs0Sh0bT4xplyP4PxMw5gcN9GOSNk"></script>
+
+    <script>
+        let allProducts = [];
+        let cartItems = [];
+        let orderTotal = 0;
+
+        // Load products and cart
+        async function initCheckout() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            if (cart.length === 0) {
+                window.location.href = 'cart.html';
+                return;
+            }
+
+            try {
+                allProducts = await getAllProducts();
+                cartItems = cart;
+                loadOrderSummary();
+                initializePayPal();
+            } catch (error) {
+                console.error('Error loading checkout:', error);
+                showToast('Error loading checkout. Please try again.', 'error');
+            }
+        }
+
+        // Get product by ID
+        function getProduct(id) {
+            return allProducts.find(p => p.id === id);
+        }
+
+        // Load order summary
+        function loadOrderSummary() {
+            const summaryItems = document.getElementById('summary-items');
+            let subtotal = 0;
+            let totalItems = 0;
+
+            summaryItems.innerHTML = cartItems.map(item => {
+                const product = getProduct(item.id);
+                if (!product) return '';
+
+                const itemTotal = product.price * item.quantity;
+                subtotal += itemTotal;
+                totalItems += item.quantity;
+
+                return `
+                    <div class="flex items-center space-x-3">
+                        <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-cover rounded">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-sm text-secondary line-clamp-1">${product.name}</h4>
+                            <p class="text-xs text-gray-500">Qty: ${item.quantity}</p>
+                            <p class="text-sm font-bold text-primary">${formatPrice(itemTotal)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const shipping = subtotal >= 3000 ? 0 : 150;
+            const tax = subtotal * 0.10;
+            const total = subtotal + shipping + tax;
+
+            orderTotal = total;
+
+            document.getElementById('summary-total-items').textContent = totalItems;
+            document.getElementById('summary-subtotal').textContent = formatPrice(subtotal);
+            document.getElementById('summary-shipping').textContent = shipping === 0 ? 'FREE' : formatPrice(shipping);
+            document.getElementById('summary-shipping').className = shipping === 0 ? 'text-green-600' : 'text-gray-600';
+            document.getElementById('summary-tax').textContent = formatPrice(tax);
+            document.getElementById('summary-total').textContent = formatPrice(total);
+        }
+
+        // Validate form
+        function validateForm() {
+            const fullName = document.getElementById('full-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const pincode = document.getElementById('pincode').value.trim();
+            const addressLine1 = document.getElementById('address-line1').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const state = document.getElementById('state').value.trim();
+
+            if (!fullName || !email || !phone || !pincode || !addressLine1 || !city || !state) {
+                showToast('Please fill in all required fields', 'error');
+                return false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Get shipping address
+        function getShippingAddress() {
+            return {
+                fullName: document.getElementById('full-name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                addressLine1: document.getElementById('address-line1').value.trim(),
+                addressLine2: document.getElementById('address-line2').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                state: document.getElementById('state').value.trim(),
+                pincode: document.getElementById('pincode').value.trim(),
+                country: document.getElementById('country').value.trim(),
+                notes: document.getElementById('order-notes').value.trim()
+            };
+        }
+
+        // Initialize PayPal
+        function initializePayPal() {
+            const loading = document.getElementById('paypal-loading');
+            const container = document.getElementById('paypal-button-container');
+
+            // Convert INR to USD for PayPal (approximate conversion)
+            const amountInUSD = (orderTotal / 83).toFixed(2); // 1 USD ≈ ₹83
+
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    if (!validateForm()) {
+                        return actions.reject();
+                    }
+
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: amountInUSD,
+                                currency_code: 'USD'
+                            },
+                            description: 'HomeHub - Home Appliances Order'
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        console.log('Payment completed:', details);
+                        
+                        // Save order
+                        saveOrder(details);
+                        
+                        // Show success
+                        showSuccessPage(details);
+                    });
+                },
+                onError: function(err) {
+                    console.error('PayPal error:', err);
+                    showToast('Payment failed. Please try again.', 'error');
+                },
+                onCancel: function(data) {
+                    showToast('Payment cancelled', 'info');
+                }
+            }).render('#paypal-button-container').then(() => {
+                loading.classList.add('hidden');
+                container.classList.remove('hidden');
+            });
+        }
+
+        // Save order to localStorage (in production, save to Supabase)
+        function saveOrder(paymentDetails) {
+            const order = {
+                orderNumber: 'ORD-' + Date.now(),
+                items: cartItems,
+                shippingAddress: getShippingAddress(),
+                paymentDetails: {
+                    orderId: paymentDetails.id,
+                    status: paymentDetails.status,
+                    payerEmail: paymentDetails.payer.email_address,
+                    amount: orderTotal
+                },
+                total: orderTotal,
+                date: new Date().toISOString(),
+                status: 'completed'
+            };
+
+            // Save to localStorage (in production, save to Supabase)
+            let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.push(order);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            // Clear cart
+            localStorage.removeItem('cart');
+
+            return order;
+        }
+
+        // Show success page
+        function showSuccessPage(paymentDetails) {
+            const order = JSON.parse(localStorage.getItem('orders') || '[]').pop();
+            
+            document.body.innerHTML = `
+                <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+                    <div class="max-w-2xl w-full bg-white rounded-xl shadow-lg p-8 text-center">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-check text-4xl text-green-600"></i>
+                        </div>
+                        
+                        <h1 class="text-3xl font-bold text-secondary mb-4">Order Placed Successfully!</h1>
+                        <p class="text-gray-600 mb-8">Thank you for your purchase. Your order has been confirmed.</p>
+                        
+                        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                            <div class="grid grid-cols-2 gap-4 text-left">
+                                <div>
+                                    <p class="text-sm text-gray-600">Order Number</p>
+                                    <p class="font-bold text-secondary">${order.orderNumber}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Total Amount</p>
+                                    <p class="font-bold text-primary">${formatPrice(order.total)}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Payment ID</p>
+                                    <p class="font-semibold text-secondary text-sm">${paymentDetails.id}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Status</p>
+                                    <p class="font-semibold text-green-600">Confirmed</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+                            <p class="text-sm text-blue-800">
+                                <i class="fas fa-envelope mr-2"></i>
+                                Order confirmation has been sent to <strong>${paymentDetails.payer.email_address}</strong>
+                            </p>
+                        </div>
+                        
+                        <div class="flex space-x-4 justify-center">
+                            <a href="../pages/orders.html" class="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-600 transition">
+                                <i class="fas fa-list mr-2"></i>View Orders
+                            </a>
+                            <a href="../index.html" class="bg-gray-200 text-secondary px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+                                <i class="fas fa-home mr-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show toast
+        function showToast(message, type = 'success') {
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'info' ? 'bg-blue-500' : 'bg-red-500';
+            const icon = type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-circle';
+            
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 ${bgColor} flex items-center space-x-2`;
+            toast.innerHTML = `<i class="fas fa-${icon}"></i><span>${message}</span>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', initCheckout);
+    </script>
+</body>
+</html>
