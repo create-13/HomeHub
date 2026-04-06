@@ -14,14 +14,15 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- Firebase SDK v8 (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Supabase Config -->
-    <script src="js/config/supabase.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
     
     <script>
         tailwind.config = {
@@ -61,39 +62,39 @@
                     <div class="hidden md:flex space-x-6">
                         <a href="index.html" class="text-primary font-medium">Home</a>
                         <a href="pages/products.html" class="text-secondary hover:text-primary font-medium transition">Shop</a>
-                        <div class="relative group">
-                            <button class="text-secondary hover:text-primary font-medium transition flex items-center">
-                                Categories <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                            </button>
-                            <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-lg mt-2 py-2 w-48">
-                                <a href="pages/products.html?category=kitchen" class="block px-4 py-2 hover:bg-gray-100">Kitchen Appliances</a>
-                                <a href="pages/products.html?category=laundry" class="block px-4 py-2 hover:bg-gray-100">Laundry</a>
-                                <a href="pages/products.html?category=cooling" class="block px-4 py-2 hover:bg-gray-100">Cooling & Heating</a>
-                                <a href="pages/products.html?category=cleaning" class="block px-4 py-2 hover:bg-gray-100">Cleaning</a>
-                            </div>
-                        </div>
-                        <a href="#deals" class="text-secondary hover:text-primary font-medium transition">Deals</a>
+                        <a href="pages/products.html" class="text-secondary hover:text-primary font-medium transition">Deals</a>
                     </div>
-                </div>
-
-                <!-- Search Bar -->
-                <div class="hidden lg:flex items-center bg-gray-100 rounded-lg px-4 py-2 w-96">
-                    <i class="fas fa-search text-gray-400 mr-2"></i>
-                    <input type="text" id="search-input" placeholder="Search for appliances..." class="bg-transparent outline-none w-full text-sm" onkeypress="handleSearch(event)">
                 </div>
 
                 <!-- Right Side Icons -->
                 <div class="flex items-center space-x-6">
-                    <div class="relative group hidden md:block">
-                        <button class="flex items-center space-x-2 text-secondary hover:text-primary transition">
+                    
+                    <!-- GUEST ACCOUNT - Show when NOT logged in -->
+                    <div id="guest-account" style="display: block;">
+                        <a href="pages/login.html" class="hidden md:flex items-center space-x-2 text-secondary hover:text-primary transition px-4 py-2 border border-gray-300 rounded-lg">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span class="text-sm font-medium">Login</span>
+                        </a>
+                        <a href="pages/login.html" class="md:hidden text-secondary hover:text-primary">
                             <i class="far fa-user text-xl"></i>
-                            <span class="text-sm font-medium">Account</span>
-                        </button>
-                        <div class="absolute right-0 hidden group-hover:block bg-white shadow-lg rounded-lg mt-2 py-2 w-48">
-                            <a href="pages/login.html" class="block px-4 py-2 hover:bg-gray-100">Login</a>
-                            <a href="pages/register.html" class="block px-4 py-2 hover:bg-gray-100">Sign Up</a>
-                            <a href="pages/orders.html" class="block px-4 py-2 hover:bg-gray-100">My Orders</a>
+                        </a>
+                    </div>
+
+                    <!-- USER ACCOUNT - Show when logged in -->
+                    <div id="user-account" style="display: none;">
+                        <div class="hidden md:flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg">
+                            <i class="fas fa-user-circle text-2xl text-primary"></i>
+                            <div>
+                                <p class="text-xs text-gray-500">Welcome back,</p>
+                                <p class="text-sm font-semibold text-secondary" id="user-name-display">User</p>
+                            </div>
+                            <button onclick="handleLogout()" class="ml-2 text-red-500 hover:text-red-600" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
                         </div>
+                        <button onclick="handleLogout()" class="md:hidden text-secondary hover:text-primary">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </button>
                     </div>
 
                     <a href="pages/wishlist.html" class="relative hidden md:block">
@@ -105,126 +106,165 @@
                         <i class="fas fa-shopping-bag text-xl text-secondary hover:text-primary transition"></i>
                         <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
                     </a>
-
-                    <button class="md:hidden text-secondary" onclick="toggleMobileMenu()">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
-            <div class="container mx-auto px-4 py-4 space-y-3">
-                <a href="index.html" class="block text-primary">Home</a>
-                <a href="pages/products.html" class="block text-secondary hover:text-primary">Shop</a>
-                <a href="pages/products.html?category=kitchen" class="block text-secondary hover:text-primary pl-4">Kitchen Appliances</a>
-                <a href="pages/products.html?category=laundry" class="block text-secondary hover:text-primary pl-4">Laundry</a>
-                <a href="pages/products.html?category=cooling" class="block text-secondary hover:text-primary pl-4">Cooling & Heating</a>
-                <a href="#deals" class="block text-secondary hover:text-primary">Deals</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Carousel -->
-    <section class="relative bg-gradient-to-r from-purple-600 to-pink-500 overflow-hidden" id="hero-carousel">
-        <div class="container mx-auto px-4 py-20">
-            <!-- Slide 1 -->
-            <div class="carousel-slide active flex flex-col md:flex-row items-center justify-between text-white">
-                <div class="md:w-1/2 mb-8 md:mb-0">
-                    <h1 class="text-5xl font-bold mb-4">Premium Home Appliances</h1>
-                    <p class="text-xl mb-6">Transform your home with our latest collection of smart appliances</p>
-                    <a href="pages/products.html" class="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
+    <!-- HERO BANNER - Horizontal Sale Banner with Product Images -->
+    <section class="bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 py-12 md:py-16">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                
+                <!-- Left Side - Sale Text -->
+                <div class="text-white text-center md:text-left">
+                    <div class="inline-block bg-white/20 backdrop-blur px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                        🔥 LIMITED TIME OFFER
+                    </div>
+                    <h1 class="text-5xl md:text-6xl font-bold mb-4">
+                        MEGA SALE
+                    </h1>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">
+                        Up to <span class="text-yellow-300">70% OFF</span>
+                    </h2>
+                    <p class="text-xl mb-8 opacity-90">
+                        Premium Home Appliances at Unbeatable Prices!
+                    </p>
+                    
+                    <!-- Countdown Timer -->
+                    <div class="flex justify-center md:justify-start space-x-4 mb-8">
+                        <div class="bg-white/20 backdrop-blur px-4 py-3 rounded-lg">
+                            <div class="text-3xl font-bold" id="hours">12</div>
+                            <div class="text-xs">Hours</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur px-4 py-3 rounded-lg">
+                            <div class="text-3xl font-bold" id="minutes">34</div>
+                            <div class="text-xs">Minutes</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur px-4 py-3 rounded-lg">
+                            <div class="text-3xl font-bold" id="seconds">56</div>
+                            <div class="text-xs">Seconds</div>
+                        </div>
+                    </div>
+
+                    <a href="pages/products.html" class="inline-block bg-white text-purple-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition transform hover:scale-105 shadow-xl">
                         Shop Now <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
-                <div class="md:w-1/2 flex justify-center">
-                    <img src="https://images.unsplash.com/photo-1556911220-bff31c812dba?w=500&h=400&fit=crop" alt="Kitchen Appliances" class="rounded-lg shadow-2xl">
-                </div>
-            </div>
 
-            <!-- Slide 2 -->
-            <div class="carousel-slide flex flex-col md:flex-row items-center justify-between text-white">
-                <div class="md:w-1/2 mb-8 md:mb-0">
-                    <h1 class="text-5xl font-bold mb-4">Up to 70% OFF</h1>
-                    <p class="text-xl mb-6">Biggest sale of the year on all home appliances</p>
-                    <a href="pages/products.html" class="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
-                        Grab Deals <i class="fas fa-tags ml-2"></i>
-                    </a>
+                <!-- Right Side - Product Images Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-4 transform hover:scale-105 transition">
+                        <img src="https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=300&h=300&fit=crop" alt="Refrigerator" class="w-full h-40 object-cover rounded-lg mb-2">
+                        <p class="text-white font-semibold text-center">Refrigerators</p>
+                        <p class="text-yellow-300 text-center text-sm">Up to 40% OFF</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-4 transform hover:scale-105 transition">
+                        <img src="https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=300&h=300&fit=crop" alt="Washing Machine" class="w-full h-40 object-cover rounded-lg mb-2">
+                        <p class="text-white font-semibold text-center">Washing Machines</p>
+                        <p class="text-yellow-300 text-center text-sm">Up to 30% OFF</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-4 transform hover:scale-105 transition">
+                        <img src="https://static.vecteezy.com/system/resources/thumbnails/049/372/114/small/a-white-air-conditioner-is-mounted-on-the-wall-in-a-room-with-a-red-and-blue-wall-the-room-has-a-bright-and-sunny-atmosphere-with-a-potted-plant-in-the-corner-photo.jpg" alt="Air Conditioner" class="w-full h-40 object-cover rounded-lg mb-2">
+                        <p class="text-white font-semibold text-center">Air Conditioners</p>
+                        <p class="text-yellow-300 text-center text-sm">Up to 25% OFF</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-4 transform hover:scale-105 transition">
+                        <img src="https://images.unsplash.com/photo-1558317374-067fb5f30001?w=300&h=300&fit=crop" alt="Vacuum Cleaner" class="w-full h-40 object-cover rounded-lg mb-2">
+                        <p class="text-white font-semibold text-center">Vacuum Cleaners</p>
+                        <p class="text-yellow-300 text-center text-sm">Up to 35% OFF</p>
+                    </div>
                 </div>
-                <div class="md:w-1/2 flex justify-center">
-                    <img src="https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=500&h=400&fit=crop" alt="Air Conditioner" class="rounded-lg shadow-2xl">
-                </div>
-            </div>
 
-            <!-- Slide 3 -->
-            <div class="carousel-slide flex flex-col md:flex-row items-center justify-between text-white">
-                <div class="md:w-1/2 mb-8 md:mb-0">
-                    <h1 class="text-5xl font-bold mb-4">Free Shipping</h1>
-                    <p class="text-xl mb-6">On all orders above ₹3,000 with fast delivery</p>
-                    <a href="pages/products.html" class="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
-                        Start Shopping <i class="fas fa-shipping-fast ml-2"></i>
-                    </a>
-                </div>
-                <div class="md:w-1/2 flex justify-center">
-                    <img src="https://images.unsplash.com/photo-1558317374-067fb5f30001?w=500&h=400&fit=crop" alt="Vacuum Cleaner" class="rounded-lg shadow-2xl">
-                </div>
             </div>
-        </div>
-
-        <!-- Carousel Dots -->
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            <button class="carousel-dot w-3 h-3 rounded-full bg-white/50 hover:bg-white transition active" onclick="goToSlide(0)"></button>
-            <button class="carousel-dot w-3 h-3 rounded-full bg-white/50 hover:bg-white transition" onclick="goToSlide(1)"></button>
-            <button class="carousel-dot w-3 h-3 rounded-full bg-white/50 hover:bg-white transition" onclick="goToSlide(2)"></button>
         </div>
     </section>
 
     <!-- Categories Section -->
     <section class="py-16 bg-gray-50">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-secondary mb-12">Shop by Category</h2>
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-secondary mb-4">Shop by Category</h2>
+                <p class="text-gray-600">Explore our wide range of premium home appliances</p>
+            </div>
+            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <a href="pages/products.html?category=kitchen" class="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                    <div class="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1556912167-f556f1f39faa?w=400&h=300&fit=crop" alt="Kitchen" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        <div class="absolute bottom-4 left-4 text-white">
-                            <h3 class="text-xl font-bold">Kitchen</h3>
-                            <p class="text-sm">Smart Appliances</p>
+                <!-- Kitchen Category -->
+                <a href="pages/products.html?category=kitchen" class="group">
+                    <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                        <div class="relative overflow-hidden h-56">
+                            <img src="https://www.shutterstock.com/image-photo/different-household-appliances-gift-on-260nw-2535432205.jpg" alt="Kitchen" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 text-white">
+                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-2">
+                                    <i class="fas fa-utensils text-xl"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold">Kitchen</h3>
+                                <p class="text-sm opacity-90">15+ Products</p>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gradient-to-r from-primary to-pink-500">
+                            <p class="text-white text-center font-semibold">Explore Kitchen <i class="fas fa-arrow-right ml-2"></i></p>
                         </div>
                     </div>
                 </a>
 
-                <a href="pages/products.html?category=laundry" class="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                    <div class="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=400&h=300&fit=crop" alt="Laundry" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        <div class="absolute bottom-4 left-4 text-white">
-                            <h3 class="text-xl font-bold">Laundry</h3>
-                            <p class="text-sm">Washers & Dryers</p>
+                <!-- Laundry Category -->
+                <a href="pages/products.html?category=laundry" class="group">
+                    <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                        <div class="relative overflow-hidden h-56">
+                            <img src="https://media.istockphoto.com/id/1468588754/photo/laundry-room-interior-with-washing-machine-dryer-white-cabinets-drying-rack-and-blurred-plants.jpg?s=612x612&w=0&k=20&c=jTk9Ttls3S_tSFiOIhzLajdUe1xwHkWc4FRceF5_GIM=" alt="Laundry" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 text-white">
+                                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-2">
+                                    <i class="fas fa-tshirt text-xl"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold">Laundry</h3>
+                                <p class="text-sm opacity-90">12+ Products</p>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gradient-to-r from-blue-500 to-blue-600">
+                            <p class="text-white text-center font-semibold">Explore Laundry <i class="fas fa-arrow-right ml-2"></i></p>
                         </div>
                     </div>
                 </a>
 
-                <a href="pages/products.html?category=cooling" class="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                    <div class="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=400&h=300&fit=crop" alt="Cooling" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        <div class="absolute bottom-4 left-4 text-white">
-                            <h3 class="text-xl font-bold">Cooling</h3>
-                            <p class="text-sm">ACs & Coolers</p>
+                <!-- Cooling Category -->
+                <a href="pages/products.html?category=cooling" class="group">
+                    <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                        <div class="relative overflow-hidden h-56">
+                            <img src="https://t4.ftcdn.net/jpg/18/90/83/91/240_F_1890839192_rgiqEO5aEEFhvq2K5fzInHggGBodLkZ6.jpg" alt="Cooling" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 text-white">
+                                <div class="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center mb-2">
+                                    <i class="fas fa-snowflake text-xl"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold">Cooling</h3>
+                                <p class="text-sm opacity-90">13+ Products</p>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gradient-to-r from-cyan-500 to-cyan-600">
+                            <p class="text-white text-center font-semibold">Explore Cooling <i class="fas fa-arrow-right ml-2"></i></p>
                         </div>
                     </div>
                 </a>
 
-                <a href="pages/products.html?category=cleaning" class="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                    <div class="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&h=300&fit=crop" alt="Cleaning" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        <div class="absolute bottom-4 left-4 text-white">
-                            <h3 class="text-xl font-bold">Cleaning</h3>
-                            <p class="text-sm">Vacuums & Purifiers</p>
+                <!-- Cleaning Category -->
+                <a href="pages/products.html?category=cleaning" class="group">
+                    <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                        <div class="relative overflow-hidden h-56">
+                            <img src="data:image/jpeg;base64,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" alt="Cleaning" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 text-white">
+                                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-2">
+                                    <i class="fas fa-broom text-xl"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold">Cleaning</h3>
+                                <p class="text-sm opacity-90">10+ Products</p>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gradient-to-r from-green-500 to-green-600">
+                            <p class="text-white text-center font-semibold">Explore Cleaning <i class="fas fa-arrow-right ml-2"></i></p>
                         </div>
                     </div>
                 </a>
@@ -236,9 +276,12 @@
     <section class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between mb-12">
-                <h2 class="text-3xl font-bold text-secondary">Featured Products</h2>
-                <a href="pages/products.html" class="text-primary font-semibold hover:underline">
-                    View All <i class="fas fa-arrow-right ml-1"></i>
+                <div>
+                    <h2 class="text-4xl font-bold text-secondary mb-2">Featured Products</h2>
+                    <p class="text-gray-600">Handpicked best sellers for you</p>
+                </div>
+                <a href="pages/products.html" class="hidden md:block text-primary font-semibold hover:underline text-lg">
+                    View All Products <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>
 
@@ -252,55 +295,37 @@
             <div id="featured-products-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <!-- Products will be loaded here from database -->
             </div>
-        </div>
-    </section>
 
-    <!-- Flash Sale Banner -->
-    <section class="py-16 bg-gradient-to-r from-accent to-red-500">
-        <div class="container mx-auto px-4 text-center text-white">
-            <h2 class="text-4xl font-bold mb-4">⚡ Flash Sale Ending Soon!</h2>
-            <p class="text-xl mb-6">Hurry! Limited time offer on selected appliances</p>
-            <div class="flex justify-center space-x-4 mb-8">
-                <div class="bg-white/20 backdrop-blur px-6 py-4 rounded-lg">
-                    <div class="text-3xl font-bold" id="hours">12</div>
-                    <div class="text-sm">Hours</div>
-                </div>
-                <div class="bg-white/20 backdrop-blur px-6 py-4 rounded-lg">
-                    <div class="text-3xl font-bold" id="minutes">34</div>
-                    <div class="text-sm">Minutes</div>
-                </div>
-                <div class="bg-white/20 backdrop-blur px-6 py-4 rounded-lg">
-                    <div class="text-3xl font-bold" id="seconds">56</div>
-                    <div class="text-sm">Seconds</div>
-                </div>
+            <!-- View All Button (Mobile) -->
+            <div class="text-center mt-8 md:hidden">
+                <a href="pages/products.html" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-pink-600 transition">
+                    View All Products
+                </a>
             </div>
-            <a href="pages/products.html" class="bg-white text-accent px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
-                Shop Flash Sale
-            </a>
         </div>
     </section>
 
     <!-- Brands Section -->
     <section class="py-16 bg-gray-50">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-secondary mb-12">Top Brands</h2>
+            <h2 class="text-3xl font-bold text-center text-secondary mb-12">Top Brands We Carry</h2>
             <div class="grid grid-cols-3 md:grid-cols-6 gap-8">
-                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-xl transition">
                     <span class="text-2xl font-bold text-gray-700">Samsung</span>
                 </div>
-                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-xl transition">
                     <span class="text-2xl font-bold text-gray-700">LG</span>
                 </div>
-                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-xl transition">
                     <span class="text-2xl font-bold text-gray-700">Whirlpool</span>
                 </div>
-                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-xl transition">
                     <span class="text-2xl font-bold text-gray-700">Bosch</span>
                 </div>
-                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-xl transition">
                     <span class="text-2xl font-bold text-gray-700">Dyson</span>
                 </div>
-                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-xl transition">
                     <span class="text-2xl font-bold text-gray-700">Daikin</span>
                 </div>
             </div>
@@ -311,30 +336,30 @@
     <section class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="grid md:grid-cols-4 gap-8">
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-shipping-fast text-3xl text-primary"></i>
+                <div class="text-center group hover:transform hover:scale-105 transition">
+                    <div class="w-20 h-20 bg-gradient-to-r from-primary to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl transition">
+                        <i class="fas fa-shipping-fast text-4xl text-white"></i>
                     </div>
                     <h3 class="text-xl font-bold text-secondary mb-2">Free Shipping</h3>
                     <p class="text-gray-600">On orders above ₹3,000</p>
                 </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-undo text-3xl text-primary"></i>
+                <div class="text-center group hover:transform hover:scale-105 transition">
+                    <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl transition">
+                        <i class="fas fa-undo text-4xl text-white"></i>
                     </div>
                     <h3 class="text-xl font-bold text-secondary mb-2">Easy Returns</h3>
                     <p class="text-gray-600">30-day return policy</p>
                 </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-shield-alt text-3xl text-primary"></i>
+                <div class="text-center group hover:transform hover:scale-105 transition">
+                    <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl transition">
+                        <i class="fas fa-shield-alt text-4xl text-white"></i>
                     </div>
                     <h3 class="text-xl font-bold text-secondary mb-2">Secure Payment</h3>
                     <p class="text-gray-600">100% secure transactions</p>
                 </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-headset text-3xl text-primary"></i>
+                <div class="text-center group hover:transform hover:scale-105 transition">
+                    <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl transition">
+                        <i class="fas fa-headset text-4xl text-white"></i>
                     </div>
                     <h3 class="text-xl font-bold text-secondary mb-2">24/7 Support</h3>
                     <p class="text-gray-600">Dedicated customer service</p>
@@ -398,38 +423,123 @@
     </footer>
 
     <!-- Scripts -->
+    <!-- Firebase Configuration -->
+    <script>
+        // Firebase Config - REPLACE WITH YOUR CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyAH8bN0cSMyj8T4niN6spjE79ZKtNyLk8Q",
+            authDomain: "homehub-4477e.firebaseapp.com",
+            projectId: "homehub-4477e",
+            storageBucket: "homehub-4477e.firebasestorage.app",
+            messagingSenderId: "409144228304",
+            appId: "1:409144228304:web:629831fba15e583a8de1d5"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        console.log('✅ Firebase initialized');
+    </script>
+
+    <!-- Supabase Configuration -->
+    <script>
+        // Supabase Config - REPLACE WITH YOUR CONFIG
+        const SUPABASE_URL = 'https://jrplrlthsrviixxltjks.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpycGxybHRoc3J2aWl4eGx0amtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMzM1NzYsImV4cCI6MjA4NjkwOTU3Nn0.6NbKYxUyYGd8nVrOEL_CcESdRrL7hRW87InUvSQUuhs';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase initialized');
+
+        // Helper Functions
+        async function getAllProducts() {
+            const { data, error } = await supabaseClient
+                .from('products')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('Error fetching products:', error);
+                return [];
+            }
+            return data;
+        }
+
+        async function getFeaturedProducts() {
+            const { data, error } = await supabaseClient
+                .from('products')
+                .select('*')
+                .eq('is_featured', true)
+                .limit(8);
+            
+            if (error) {
+                console.error('Error fetching featured products:', error);
+                return [];
+            }
+            return data;
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(price);
+        }
+    </script>
+
+    <!-- Authentication State Management -->
+    <script>
+        // Check authentication state
+        let currentUser = null;
+
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            const userAccount = document.getElementById('user-account');
+            const guestAccount = document.getElementById('guest-account');
+            
+            console.log('Auth state changed:', user ? user.email : 'No user');
+            
+            if (user) {
+                // User is logged in
+                userAccount.style.display = 'block';
+                guestAccount.style.display = 'none';
+                
+                // Set user name
+                const displayName = user.displayName || user.email.split('@')[0];
+                document.getElementById('user-name-display').textContent = displayName;
+                
+                console.log('✅ User logged in:', displayName);
+            } else {
+                // User is NOT logged in
+                userAccount.style.display = 'none';
+                guestAccount.style.display = 'block';
+                
+                console.log('❌ No user logged in');
+            }
+        });
+
+        // Logout function
+        async function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await auth.signOut();
+                    showToast('Logged out successfully', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    showToast('Logout failed', 'error');
+                }
+            }
+        }
+    </script>
+
+    <!-- Cart & Product Functions -->
     <script>
         // Mobile Menu Toggle
         function toggleMobileMenu() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
+            document.getElementById('mobile-menu')?.classList.toggle('hidden');
         }
-
-        // Hero Carousel
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.carousel-slide');
-        const dots = document.querySelectorAll('.carousel-dot');
-
-        function showSlide(index) {
-            slides.forEach((slide, i) => {
-                slide.classList.remove('active');
-                dots[i].classList.remove('active');
-            });
-            slides[index].classList.add('active');
-            dots[index].classList.add('active');
-        }
-
-        function goToSlide(index) {
-            currentSlide = index;
-            showSlide(currentSlide);
-        }
-
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % slides.length;
-            showSlide(currentSlide);
-        }
-
-        // Auto-play carousel
-        setInterval(nextSlide, 5000);
 
         // Countdown Timer
         function updateCountdown() {
@@ -442,9 +552,11 @@
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            if (document.getElementById('hours')) {
+                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            }
         }
 
         setInterval(updateCountdown, 1000);
@@ -474,7 +586,7 @@
                 const loading = document.getElementById('featured-loading');
                 const grid = document.getElementById('featured-products-grid');
 
-                loading.classList.add('hidden');
+                if (loading) loading.classList.add('hidden');
 
                 if (featuredProducts.length === 0) {
                     grid.innerHTML = '<p class="col-span-4 text-center text-gray-600">No featured products available.</p>';
@@ -493,13 +605,10 @@
                     const wishlistIcon = isInWishlist(product.id) ? 'fas' : 'far';
 
                     return `
-                        <div class="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                             <div class="relative overflow-hidden cursor-pointer" onclick="viewProduct(${product.id})">
                                 <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300">
                                 ${discountBadge}
-                                <button onclick="event.stopPropagation(); toggleWishlist(${product.id})" class="absolute top-2 right-2 bg-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-50" id="wishlist-btn-${product.id}">
-                                    <i class="${wishlistIcon} fa-heart text-red-500"></i>
-                                </button>
                             </div>
                             <div class="p-4 cursor-pointer" onclick="viewProduct(${product.id})">
                                 <div class="text-xs text-gray-500 mb-1">${product.brand}</div>
@@ -531,17 +640,27 @@
                 console.log('✅ Loaded', featuredProducts.length, 'featured products');
             } catch (error) {
                 console.error('Error loading featured products:', error);
-                document.getElementById('featured-loading').innerHTML = `
-                    <div class="text-center py-12">
-                        <i class="fas fa-exclamation-triangle text-4xl text-red-300 mb-4"></i>
-                        <p class="text-gray-600">Error loading products. Please refresh the page.</p>
-                    </div>
-                `;
             }
         }
 
-        // Add to cart
+        // Add to cart WITH AUTH CHECK
         function addToCart(productId) {
+            console.log('Add to cart clicked for product:', productId);
+            console.log('Current user:', currentUser);
+            
+            // Check if user is logged in
+            if (!currentUser) {
+                console.log('❌ User not logged in - showing prompt');
+                if (confirm('Please login to add items to cart.\n\nWould you like to login now?')) {
+                    sessionStorage.setItem('pendingCartItem', productId);
+                    window.location.href = 'pages/login.html';
+                }
+                return;
+            }
+            
+            console.log('✅ User is logged in - adding to cart');
+            
+            // User is logged in - proceed with adding to cart
             getAllProducts().then(allProducts => {
                 const product = allProducts.find(p => p.id === productId);
                 if (!product) return;
@@ -583,16 +702,6 @@
 
             localStorage.setItem('wishlist', JSON.stringify(wishlist));
             updateWishlistCount();
-            
-            const button = document.getElementById(`wishlist-btn-${productId}`);
-            if (button) {
-                const icon = button.querySelector('i');
-                if (index > -1) {
-                    icon.className = 'far fa-heart text-red-500';
-                } else {
-                    icon.className = 'fas fa-heart text-red-500';
-                }
-            }
         }
 
         // View product
@@ -603,8 +712,10 @@
         // Handle search
         function handleSearch(event) {
             if (event.key === 'Enter') {
-                const searchTerm = document.getElementById('search-input').value;
-                window.location.href = `pages/products.html?search=${encodeURIComponent(searchTerm)}`;
+                const searchTerm = document.getElementById('search-input')?.value;
+                if (searchTerm) {
+                    window.location.href = `pages/products.html?search=${encodeURIComponent(searchTerm)}`;
+                }
             }
         }
 
@@ -612,7 +723,8 @@
         function updateCartCount() {
             const cart = JSON.parse(localStorage.getItem('cart') || '[]');
             const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-            document.getElementById('cart-count').textContent = count;
+            const cartCountEl = document.getElementById('cart-count');
+            if (cartCountEl) cartCountEl.textContent = count;
         }
 
         // Update wishlist count
@@ -638,6 +750,7 @@
 
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Page loaded - initializing...');
             updateCartCount();
             updateWishlistCount();
             loadFeaturedProducts();
