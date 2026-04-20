@@ -48,84 +48,104 @@
     </div>
 
     <!-- Navbar -->
-    <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between py-4">
-                <!-- Logo -->
-                <div class="flex items-center space-x-8">
-                    <a href="../index.html" class="text-2xl font-bold text-secondary">
-                        <i class="fas fa-home text-primary"></i> HomeHub
+<nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between py-4">
+            <!-- Logo -->
+            <div class="flex items-center space-x-8">
+                <a href="../index.html" class="text-2xl font-bold text-secondary">
+                    <i class="fas fa-home text-primary"></i> HomeHub
+                </a>
+                
+                <!-- Main Navigation -->
+                <div class="hidden md:flex space-x-6">
+                    <a href="../index.html" class="text-secondary hover:text-primary font-medium transition">Home</a>
+                    <a href="products.html" class="text-secondary hover:text-primary font-medium transition">Shop</a>
+                    <a href="products.html" class="text-secondary hover:text-primary font-medium transition">Deals</a>
+                </div>
+            </div>
+
+            <!-- Right Side Icons -->
+            <div class="flex items-center space-x-6">
+                
+                <!-- GUEST ACCOUNT - Show when NOT logged in -->
+                <div id="guest-account" style="display: block;">
+                    <a href="login.html" class="hidden md:flex items-center space-x-2 text-secondary hover:text-primary transition px-4 py-2 border border-gray-300 rounded-lg">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span class="text-sm font-medium">Login</span>
                     </a>
-                    
-                    <!-- Main Navigation -->
-                    <div class="hidden md:flex space-x-6">
-                        <a href="../index.html" class="text-secondary hover:text-primary font-medium transition">Home</a>
-                        <a href="products.html" class="text-primary font-medium">Shop</a>
-                        <div class="relative group">
-                            <button class="text-secondary hover:text-primary font-medium transition flex items-center">
-                                Categories <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                            </button>
-                            <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-lg mt-2 py-2 w-48">
-                                <a href="products.html?category=kitchen" class="block px-4 py-2 hover:bg-gray-100">Kitchen Appliances</a>
-                                <a href="products.html?category=laundry" class="block px-4 py-2 hover:bg-gray-100">Laundry</a>
-                                <a href="products.html?category=cooling" class="block px-4 py-2 hover:bg-gray-100">Cooling & Heating</a>
-                                <a href="products.html?category=cleaning" class="block px-4 py-2 hover:bg-gray-100">Cleaning</a>
-                            </div>
+                    <a href="login.html" class="md:hidden text-secondary hover:text-primary">
+                        <i class="far fa-user text-xl"></i>
+                    </a>
+                </div>
+
+                <!-- USER ACCOUNT - Show when logged in -->
+                <div id="user-account" style="display: none;">
+                    <div class="hidden md:flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg">
+                        <i class="fas fa-user-circle text-2xl text-primary"></i>
+                        <div>
+                            <p class="text-xs text-gray-500">Welcome,</p>
+                            <p class="text-sm font-semibold text-secondary" id="user-name-display">User</p>
                         </div>
-                        <a href="#deals" class="text-secondary hover:text-primary font-medium transition">Deals</a>
-                    </div>
-                </div>
-
-                <!-- Search Bar -->
-                <div class="hidden lg:flex items-center bg-gray-100 rounded-lg px-4 py-2 w-96">
-                    <i class="fas fa-search text-gray-400 mr-2"></i>
-                    <input type="text" id="search-input" placeholder="Search for appliances..." class="bg-transparent outline-none w-full text-sm">
-                </div>
-
-                <!-- Right Side Icons -->
-                <div class="flex items-center space-x-6">
-                    <div class="relative group hidden md:block">
-                        <button class="flex items-center space-x-2 text-secondary hover:text-primary transition">
-                            <i class="far fa-user text-xl"></i>
-                            <span class="text-sm font-medium">Account</span>
+                        <button onclick="handleLogout()" class="ml-2 text-red-500 hover:text-red-600" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
                         </button>
-                        <div class="absolute right-0 hidden group-hover:block bg-white shadow-lg rounded-lg mt-2 py-2 w-48">
-                            <a href="login.html" class="block px-4 py-2 hover:bg-gray-100">Login</a>
-                            <a href="register.html" class="block px-4 py-2 hover:bg-gray-100">Sign Up</a>
-                            <a href="orders.html" class="block px-4 py-2 hover:bg-gray-100">My Orders</a>
-                        </div>
                     </div>
-
-                    <a href="wishlist.html" class="relative hidden md:block">
-                        <i class="far fa-heart text-xl text-secondary hover:text-primary transition"></i>
-                        <span class="wishlist-count absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
-                    </a>
-
-                    <a href="cart.html" class="relative">
-                        <i class="fas fa-shopping-bag text-xl text-secondary hover:text-primary transition"></i>
-                        <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
-                    </a>
-
-                    <button class="md:hidden text-secondary" onclick="toggleMobileMenu()">
-                        <i class="fas fa-bars text-2xl"></i>
+                    <button onclick="handleLogout()" class="md:hidden text-secondary hover:text-primary">
+                        <i class="fas fa-user-circle text-xl"></i>
                     </button>
                 </div>
+
+                <a href="wishlist.html" class="relative hidden md:block">
+                    <i class="far fa-heart text-xl text-secondary hover:text-primary transition"></i>
+                    <span class="wishlist-count absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                </a>
+
+                <a href="cart.html" class="relative">
+                    <i class="fas fa-shopping-bag text-xl text-secondary hover:text-primary transition"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                </a>
+
+                <button class="md:hidden text-secondary" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
             </div>
         </div>
+    </div>
 
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
-            <div class="container mx-auto px-4 py-4 space-y-3">
-                <a href="../index.html" class="block text-secondary hover:text-primary">Home</a>
-                <a href="products.html" class="block text-primary">Shop</a>
-                <a href="products.html?category=kitchen" class="block text-secondary hover:text-primary pl-4">Kitchen Appliances</a>
-                <a href="products.html?category=laundry" class="block text-secondary hover:text-primary pl-4">Laundry</a>
-                <a href="products.html?category=cooling" class="block text-secondary hover:text-primary pl-4">Cooling & Heating</a>
-                <a href="#deals" class="block text-secondary hover:text-primary">Deals</a>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+        <div class="container mx-auto px-4 py-4 space-y-3">
+            <a href="../index.html" class="block text-secondary hover:text-primary">Home</a>
+            <a href="products.html" class="block text-secondary hover:text-primary">Shop</a>
+            
+            <!-- Mobile User Menu (Logged In) -->
+            <div id="mobile-user-menu" style="display: none;">
+                <div class="border-t pt-3 mt-3">
+                    <p class="text-xs text-gray-500 mb-2">Account</p>
+                    <p class="font-semibold mb-2" id="mobile-user-name">User</p>
+                    <a href="profile.html" class="block text-secondary hover:text-primary pl-4 py-1">My Profile</a>
+                    <a href="orders.html" class="block text-secondary hover:text-primary pl-4 py-1">My Orders</a>
+                    <a href="#" onclick="handleLogout()" class="block text-red-600 pl-4 py-1">Logout</a>
+                </div>
+            </div>
+            
+            <!-- Mobile Guest Menu (Not Logged In) -->
+            <div id="mobile-guest-menu" style="display: block;">
+                <div class="border-t pt-3 mt-3">
+                    <a href="login.html" class="block text-secondary hover:text-primary pl-4 py-2">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </a>
+                    <a href="register.html" class="block text-secondary hover:text-primary pl-4 py-2">
+                        <i class="fas fa-user-plus mr-2"></i>Sign Up
+                    </a>
+                </div>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
+       
     <!-- Breadcrumb -->
     <div class="bg-white border-b">
         <div class="container mx-auto px-4 py-3">
@@ -475,7 +495,7 @@
             return `
                 <div class="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                     <div class="relative overflow-hidden cursor-pointer" onclick="viewProduct(${product.id})">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300">
                         ${discountBadge}
                         <button onclick="event.stopPropagation(); toggleWishlist(${product.id}, event)" class="absolute top-2 right-2 bg-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-50" id="wishlist-btn-${product.id}">
                             <i class="${wishlistIcon} fa-heart text-red-500"></i>

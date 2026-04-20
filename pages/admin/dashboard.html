@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - HomeHub</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF3E6C',
+                        secondary: '#282C3F'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Sidebar -->
+    <div class="flex h-screen">
+        
+        <!-- Sidebar -->
+        <div class="w-64 bg-secondary text-white">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold">
+                    <i class="fas fa-home text-primary"></i> HomeHub Admin
+                </h2>
+            </div>
+            
+            <nav class="mt-6">
+                <a href="dashboard.html" class="flex items-center px-6 py-3 bg-primary text-white">
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="orders.html" class="flex items-center px-6 py-3 hover:bg-gray-700 transition">
+                    <i class="fas fa-box w-6"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="products.html" class="flex items-center px-6 py-3 hover:bg-gray-700 transition">
+                    <i class="fas fa-shopping-bag w-6"></i>
+                    <span>Products</span>
+                </a>
+                <a href="customers.html" class="flex items-center px-6 py-3 hover:bg-gray-700 transition">
+                    <i class="fas fa-users w-6"></i>
+                    <span>Customers</span>
+                </a>
+                <a href="../../index.html" class="flex items-center px-6 py-3 hover:bg-gray-700 transition mt-auto">
+                    <i class="fas fa-arrow-left w-6"></i>
+                    <span>Back to Store</span>
+                </a>
+                <a href="#" onclick="handleLogout()" class="flex items-center px-6 py-3 hover:bg-red-700 transition text-red-300">
+                    <i class="fas fa-sign-out-alt w-6"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto">
+            
+            <!-- Header -->
+            <div class="bg-white shadow-sm">
+                <div class="px-8 py-6">
+                    <h1 class="text-2xl font-bold text-secondary">Dashboard</h1>
+                    <p class="text-gray-600">Welcome back, Admin!</p>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    
+                    <!-- Total Revenue -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Revenue</p>
+                                <h3 class="text-2xl font-bold text-secondary mt-1" id="total-revenue">₹0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-rupee-sign text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-green-600 text-sm mt-4">
+                            <i class="fas fa-arrow-up mr-1"></i>12% from last month
+                        </p>
+                    </div>
+
+                    <!-- Total Orders -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Orders</p>
+                                <h3 class="text-2xl font-bold text-secondary mt-1" id="total-orders">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-blue-600 text-sm mt-4">
+                            <i class="fas fa-arrow-up mr-1"></i>8% from last month
+                        </p>
+                    </div>
+
+                    <!-- Total Products -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Products</p>
+                                <h3 class="text-2xl font-bold text-secondary mt-1" id="total-products">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-box text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-purple-600 text-sm mt-4">
+                            <i class="fas fa-arrow-up mr-1"></i>5 new this week
+                        </p>
+                    </div>
+
+                    <!-- Total Customers -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Customers</p>
+                                <h3 class="text-2xl font-bold text-secondary mt-1" id="total-customers">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-users text-pink-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-pink-600 text-sm mt-4">
+                            <i class="fas fa-arrow-up mr-1"></i>3 new today
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-secondary">Recent Orders</h2>
+                        <a href="orders.html" class="text-primary hover:underline">View All</a>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Order ID</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Customer</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Date</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Amount</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Status</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-orders-table">
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-gray-500">
+                                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                        <p>Loading orders...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <button onclick="window.location.href='products.html'" class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition text-left">
+                        <i class="fas fa-plus-circle text-3xl text-primary mb-3"></i>
+                        <h3 class="font-bold text-secondary mb-2">Add New Product</h3>
+                        <p class="text-sm text-gray-600">Add products to your inventory</p>
+                    </button>
+                    
+                    <button onclick="window.location.href='orders.html'" class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition text-left">
+                        <i class="fas fa-list-alt text-3xl text-blue-600 mb-3"></i>
+                        <h3 class="font-bold text-secondary mb-2">Manage Orders</h3>
+                        <p class="text-sm text-gray-600">View and process orders</p>
+                    </button>
+                    
+                    <button onclick="window.location.href='customers.html'" class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition text-left">
+                        <i class="fas fa-user-friends text-3xl text-green-600 mb-3"></i>
+                        <h3 class="font-bold text-secondary mb-2">View Customers</h3>
+                        <p class="text-sm text-gray-600">Manage customer database</p>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Supabase Config -->
+    <script src="../../js/config/supabase.js"></script>
+    
+    <!-- Firebase Config -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+    </script>
+
+    <script>
+        // Auth check
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                alert('Please login as admin');
+                window.location.href = '../login.html';
+                return;
+            }
+            
+            // Load dashboard data
+            loadDashboardData();
+        });
+
+        // Logout
+        async function handleLogout() {
+            if (confirm('Logout from admin panel?')) {
+                await auth.signOut();
+                window.location.href = '../../index.html';
+            }
+        }
+
+        // Format price
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(price);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Get total revenue
+                const { data: orders } = await supabaseClient
+                    .from('orders')
+                    .select('total_amount');
+                
+                if (orders) {
+                    const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_amount), 0);
+                    document.getElementById('total-revenue').textContent = formatPrice(totalRevenue);
+                    document.getElementById('total-orders').textContent = orders.length;
+                }
+
+                // Get total products
+                const { data: products } = await supabaseClient
+                    .from('products')
+                    .select('id');
+                
+                if (products) {
+                    document.getElementById('total-products').textContent = products.length;
+                }
+
+                // Get total customers
+                const { data: customers } = await supabaseClient
+                    .from('users')
+                    .select('id');
+                
+                if (customers) {
+                    document.getElementById('total-customers').textContent = customers.length;
+                }
+
+                // Load recent orders
+                loadRecentOrders();
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Load recent orders
+        async function loadRecentOrders() {
+            try {
+                const { data: orders } = await supabaseClient
+                    .from('orders')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                const tbody = document.getElementById('recent-orders-table');
+
+                if (!orders || orders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No orders yet</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = orders.map(order => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-4 font-semibold">#${order.order_number}</td>
+                        <td class="py-3 px-4">${order.customer_name}</td>
+                        <td class="py-3 px-4">${formatDate(order.created_at)}</td>
+                        <td class="py-3 px-4 font-semibold text-primary">${formatPrice(order.total_amount)}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-3 py-1 bg-${order.order_status === 'delivered' ? 'green' : order.order_status === 'cancelled' ? 'red' : 'yellow'}-100 text-${order.order_status === 'delivered' ? 'green' : order.order_status === 'cancelled' ? 'red' : 'yellow'}-800 rounded-full text-xs font-semibold capitalize">
+                                ${order.order_status}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <button onclick="viewOrder('${order.id}')" class="text-primary hover:underline text-sm">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading recent orders:', error);
+            }
+        }
+
+        // View order
+        function viewOrder(orderId) {
+            window.location.href = `orders.html?id=${orderId}`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Admin dashboard loaded');
+        });
+    </script>
+</body>
+</html>
